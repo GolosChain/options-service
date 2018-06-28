@@ -21,8 +21,6 @@ services:
     networks:
       - services-tier
     environment:
-      - LOGIN
-      - WIF
       - DAY_START
       - MONGO_CONNECT_STRING
       - BLOCKCHAIN_SUBSCRIBE_TIMEOUT

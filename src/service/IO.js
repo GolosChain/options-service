@@ -1,7 +1,7 @@
-const Option = require('./Option');
+const Option = require('../model/Option');
 // TODO -
 
-class IOService extends BasicService {
+class IO extends BasicService {
     async start() {
         // TODO -
     }
