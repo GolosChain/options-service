@@ -1,11 +1,11 @@
-const IOService = require('./service/IO');
+const Gate = require('./service/Gate');
 // TODO -
 
 class Main extends BasicService {
     constructor() {
         super();
 
-        this.addNested(new MongoDB(), new IOService());
+        this.addNested(new MongoDB(), new Gate());
         this.stopOnExit();
     }
 

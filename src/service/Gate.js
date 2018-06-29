@@ -1,7 +1,7 @@
 const Option = require('../model/Option');
 // TODO -
 
-class IO extends BasicService {
+class Gate extends BasicService {
     async start() {
         // TODO -
     }
