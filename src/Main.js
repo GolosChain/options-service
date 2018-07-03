@@ -1,11 +1,17 @@
-const Gate = require('./service/Gate');
-// TODO -
+const core = require('griboyedov');
+const BasicService = core.service.Basic;
+const logger = core.Logger;
+const stats = core.Stats.client;
+const MongoDB = core.service.MongoDB;
+const Gate = core.service.Gate;
+const Distributor = require('./service/Distributor');
 
 class Main extends BasicService {
     constructor() {
         super();
 
-        this.addNested(new MongoDB(), new Gate());
+        this.printEnvBasedConfig();
+        this.addNested(new MongoDB(), new Distributor(Gate));
         this.stopOnExit();
     }
 

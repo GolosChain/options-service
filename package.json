@@ -1,5 +1,5 @@
 {
-    "name": "options",
+    "name": "solzhenitsyn",
     "version": "0.0.1",
     "description": "",
     "main": "./src/Main.js",
@@ -16,5 +16,8 @@
     "license": "GPL-3.0",
     "devDependencies": {
         "prettier": "^1.13.6"
+    },
+    "dependencies": {
+        "griboyedov": "git+https://github.com/GolosChain/griboyedov.git"
     }
 }

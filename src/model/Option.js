@@ -1,4 +1,5 @@
-// TODO -
+const core = require('griboyedov');
+const MongoDB = core.service.MongoDB;
 
 module.exports = MongoDB.makeModel('Option', {
     user: {
