@@ -33,9 +33,9 @@ class Distributor extends BasicService {
             const timer = new Date();
             const record = await Option.findOne(
                 { user },
-                { _id: 0, [service]: 1 }
+                { _id: 0, options: 1 }
             );
-            let options = record[service];
+            let options = record.options[service];
 
             for (let token of path.split('.')) {
                 options = options[token];
@@ -53,7 +53,7 @@ class Distributor extends BasicService {
         const targetOptions = this._normalizeData(data);
 
         for (let { user, service, path, data } of targetOptions) {
-            const pathQuery = `${service}.${path}`;
+            const pathQuery = `options.${service}.${path}`;
 
             await Option.updateOne({ user }, { $set: { [pathQuery]: data } });
             stats.timing('update_one_option', new Date() - timer);
