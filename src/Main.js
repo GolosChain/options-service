@@ -4,13 +4,14 @@ const logger = core.Logger;
 const stats = core.Stats.client;
 const MongoDB = core.service.MongoDB;
 const Gate = core.service.Gate;
+const env = require('./Env');
 const Distributor = require('./service/Distributor');
 
 class Main extends BasicService {
     constructor() {
         super();
 
-        this.printEnvBasedConfig();
+        this.printEnvBasedConfig(env);
         this.addNested(new MongoDB(), new Distributor(Gate));
         this.stopOnExit();
     }

@@ -10,8 +10,8 @@ services:
       - 27017:27017
     networks:
       - services-tier
-  node:
-    container_name: node
+  node-solzhenitsyn:
+    container_name: node-solzhenitsyn
     restart: always
     depends_on:
       - mongo
@@ -20,7 +20,10 @@ services:
       dockerfile: Dockerfile
     networks:
       - services-tier
+    ports:
+      - $GATE_LISTEN_PORT:$GATE_LISTEN_PORT
     environment:
+      - GATE_LISTEN_PORT
       - DAY_START
       - MONGO_CONNECT_STRING
       - BLOCKCHAIN_SUBSCRIBE_TIMEOUT

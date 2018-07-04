@@ -31,21 +31,38 @@ class Distributor extends BasicService {
 
         for (let { user, service, path } of requestedOptions) {
             const timer = new Date();
-            const record = await Option.findOne(
-                { user },
-                { _id: 0, options: 1 }
-            );
-            let options = record.options[service];
+            const record = await this._getUser(user);
 
-            for (let token of path.split('.')) {
-                options = options[token];
+            if (!record) {
+                throw { code: 404, message: 'Not found' };
             }
 
-            result.push(options);
-            stats.timing('extract_one_option', new Date() - timer);
+            try {
+                result.push(this._extractOptions(record, service, path));
+            } catch (error) {
+                result.push(null);
+            } finally {
+                stats.timing('extract_one_option', new Date() - timer);
+            }
         }
 
         return result;
+    }
+
+    async _getUser(user) {
+        return await Option.findOne({ user }, { _id: 0, options: 1 });
+    }
+
+    _extractOptions(record, service, path) {
+        let options = record.options[service];
+
+        if (path) {
+            for (let token of path.split('.')) {
+                options = options[token];
+            }
+        }
+
+        return options;
     }
 
     async _set(data) {
@@ -55,17 +72,29 @@ class Distributor extends BasicService {
         for (let { user, service, path, data } of targetOptions) {
             const pathQuery = `options.${service}.${path}`;
 
-            await Option.updateOne({ user }, { $set: { [pathQuery]: data } });
-            stats.timing('update_one_option', new Date() - timer);
+            try {
+                await Option.updateOne(
+                    { user },
+                    { $set: { user, [pathQuery]: data } },
+                    { upsert: true }
+                );
+            } catch (error) {
+                throw {
+                    code: 400,
+                    message: `Invalid params - ${user} | ${service} | ${path}`,
+                };
+            } finally {
+                stats.timing('update_one_option', new Date() - timer);
+            }
         }
     }
 
     _normalizeData(data) {
-        if (typeof data === 'object') {
-            data = [data];
+        if (data instanceof Array) {
+            return data;
         }
 
-        return data;
+        return [data];
     }
 }
 

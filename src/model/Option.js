@@ -9,5 +9,5 @@ module.exports = MongoDB.makeModel('Option', {
     options: {
         type: Object,
         required: true,
-    }
+    },
 });
