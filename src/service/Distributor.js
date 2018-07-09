@@ -26,10 +26,19 @@ class Distributor extends BasicService {
     }
 
     async _get(data) {
+        let forcedUser = null;
+
+        if (data._frontendGate) {
+            forcedUser = data.user;
+            data = data.params;
+        }
+
         const result = [];
         const requestedOptions = this._normalizeData(data);
 
         for (let { user, service, path } of requestedOptions) {
+            user = forcedUser || user;
+
             const timer = new Date();
             const record = await this._getUser(user);
 
@@ -66,11 +75,24 @@ class Distributor extends BasicService {
     }
 
     async _set(data) {
+        let forcedUser = null;
+
+        if (data._frontendGate) {
+            forcedUser = data.user;
+            data = data.params;
+        }
+
         const timer = new Date();
         const targetOptions = this._normalizeData(data);
 
         for (let { user, service, path, data } of targetOptions) {
-            const pathQuery = `options.${service}.${path}`;
+            user = forcedUser || user;
+
+            let pathQuery = `options.${service}`;
+
+            if (path) {
+                pathQuery += `.${path}`
+            }
 
             try {
                 await Option.updateOne(
