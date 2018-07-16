@@ -91,7 +91,7 @@ class Distributor extends BasicService {
             let pathQuery = `options.${service}`;
 
             if (path) {
-                pathQuery += `.${path}`
+                pathQuery += `.${path}`;
             }
 
             try {
