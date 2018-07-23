@@ -28,8 +28,8 @@ services:
       - GLS_MONGO_CONNECT
       - GLS_METRICS_HOST
       - GLS_METRICS_PORT
-      - GLS_GATE_HOST=127.0.0.1
-      - GLS_GATE_PORT=8080
+      - GLS_GATE_HOST
+      - GLS_GATE_PORT
 
 volumes:
   mongodb_vol:
