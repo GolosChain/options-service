@@ -1,7 +1,7 @@
 version: '3.6'
 services:
-  mongo:
-    container_name: mongo
+  mongo-options:
+    container_name: mongo-options
     image: mongo
     restart: always
     volumes:
@@ -11,26 +11,27 @@ services:
     networks:
       - services-tier
 
-  node-solzhenitsyn:
-    container_name: node-solzhenitsyn
+  node-options:
+    container_name: node-options
     restart: always
     depends_on:
-      - mongo
+      - mongo-options
     build:
       context: .
       dockerfile: Dockerfile
     networks:
       - services-tier
     ports:
-      - $GATE_LISTEN_PORT:$GATE_LISTEN_PORT
+      - $GLS_GATE_HOST:$GLS_GATE_PORT:$GLS_GATE_PORT
     environment:
-      - GATE_LISTEN_PORT
-      - DAY_START
-      - MONGO_CONNECT_STRING
-      - BLOCKCHAIN_SUBSCRIBE_TIMEOUT
-      - BLOCKCHAIN_NODE_ADDRESS
-      - METRICS_HOST
-      - METRICS_PORT
+      - GLS_DAY_START
+      - GLS_MONGO_CONNECT
+      - GLS_BLOCKCHAIN_SUBSCRIBE_TIMEOUT
+      - GLS_BLOCKCHAIN_CONNECT
+      - GLS_METRICS_HOST
+      - GLS_METRICS_PORT
+      - GLS_GATE_HOST
+      - GLS_GATE_PORT
 
 volumes:
   mongodb_vol:
