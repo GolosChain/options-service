@@ -23,6 +23,7 @@ services:
       - services-tier
     ports:
       - $GLS_GATE_HOST:$GLS_GATE_PORT:$GLS_GATE_PORT
+      - $GLS_METRICS_HOST:$GLS_METRICS_PORT:$GLS_METRICS_PORT
     environment:
       - GLS_DAY_START
       - GLS_MONGO_CONNECT
