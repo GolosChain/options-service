@@ -1,7 +1,7 @@
 version: '3.6'
 services:
-  mongo-options:
-    container_name: mongo-options
+  mongo:
+    container_name: mongo
     image: mongo
     restart: always
     volumes:
@@ -11,11 +11,11 @@ services:
     networks:
       - services-tier
 
-  node-options:
-    container_name: node-options
+  node:
+    container_name: node
     restart: always
     depends_on:
-      - mongo-options
+      - mongo
     build:
       context: .
       dockerfile: Dockerfile
@@ -26,8 +26,6 @@ services:
     environment:
       - GLS_DAY_START
       - GLS_MONGO_CONNECT
-      - GLS_BLOCKCHAIN_SUBSCRIBE_TIMEOUT
-      - GLS_BLOCKCHAIN_CONNECT
       - GLS_METRICS_HOST
       - GLS_METRICS_PORT
       - GLS_GATE_HOST
