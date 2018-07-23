@@ -1,6 +1,6 @@
 {
-    "name": "solzhenitsyn",
-    "version": "0.0.1",
+    "name": "options-service",
+    "version": "0.1.0",
     "description": "",
     "main": "./src/Main.js",
     "scripts": {
@@ -19,6 +19,6 @@
         "prettier": "^1.13.6"
     },
     "dependencies": {
-        "griboyedov": "git+https://github.com/GolosChain/griboyedov.git"
+        "gls-core-service": "git+https://github.com/GolosChain/core-service.git"
     }
 }

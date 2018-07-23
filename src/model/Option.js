@@ -1,4 +1,4 @@
-const core = require('griboyedov');
+const core = require('gls-core-service');
 const MongoDB = core.service.MongoDB;
 
 module.exports = MongoDB.makeModel('Option', {
