@@ -58,6 +58,8 @@ class Distributor extends BasicService {
 
         if (!model) {
             model = await new Option({ user, profile });
+
+            await model.save();
         }
 
         return model;
