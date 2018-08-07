@@ -29,37 +29,21 @@ class Distributor extends BasicService {
 
     async _get({ user, profile }) {
         const time = new Date();
-        let data = await Option.findOne(
-            { user, profile },
-            { __v: false, _id: false, id: false },
-            { lean: true }
-        );
-
-        if (!data) {
-            data = new Option({ user, profile });
-
-            data.save();
-        }
+        let model = await this._findOrCreate(user, profile);
 
         stats.timing('options_get', new Date() - time);
-        return data.options;
+        return model.options;
     }
 
     async _set({ user, profile, data }) {
         const time = new Date();
 
         try {
-            const document = await Option.findOne(
-                { user, profile },
-                { _id: true, options: true },
-                { lean: true }
-            );
+            let model = await this._findOrCreate(user, profile);
 
-            if (document) {
-                await this._updateOptions(document, data);
-            } else {
-                await this._createOptions(user, profile, data);
-            }
+            model.options = Object.assign({}, model.options, data);
+
+            await model.save();
 
             stats.timing('options_get', new Date() - time);
         } catch (error) {
@@ -69,16 +53,14 @@ class Distributor extends BasicService {
         }
     }
 
-    async _updateOptions(document, data) {
-        const options = Object.assign({}, document.options, data);
+    async _findOrCreate(user, profile) {
+        let model = await Option.findOne({ user, profile });
 
-        await Option.update({ _id: document._id }, { $set: { options } }, { runValidators: true });
-    }
+        if (!model) {
+            model = await new Option({ user, profile });
+        }
 
-    async _createOptions(user, profile, data) {
-        const model = new Option({ user, profile, options: { ...data } });
-
-        await model.save();
+        return model;
     }
 }
 
