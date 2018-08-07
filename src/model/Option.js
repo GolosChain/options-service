@@ -15,15 +15,17 @@ module.exports = MongoDB.makeModel(
         },
         options: {
             type: Object,
-            required: true,
+            default: {},
         },
     },
     {
-        index: {
-            fields: {
-                user: 1,
-                profile: 1,
+        index: [
+            {
+                fields: {
+                    user: 1,
+                    profile: 1,
+                },
             },
-        },
+        ],
     }
 );

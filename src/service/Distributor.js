@@ -1,4 +1,5 @@
 const core = require('gls-core-service');
+const logger = core.Logger;
 const BasicService = core.service.Basic;
 const stats = core.Stats.client;
 const errors = core.HttpError;
@@ -27,32 +28,57 @@ class Distributor extends BasicService {
     }
 
     async _get({ user, profile }) {
-        const time = new Data();
-        const data = await Option.findOne(
+        const time = new Date();
+        let data = await Option.findOne(
             { user, profile },
             { __v: false, _id: false, id: false },
             { lean: true }
         );
 
-        if (data) {
-            stats.timing('options_get', new Data() - time);
-            return data;
-        } else {
-            stats.increment('options_not_found');
-            throw errors.E404.error;
+        if (!data) {
+            data = new Option({ user, profile });
+
+            data.save();
         }
+
+        stats.timing('options_get', new Date() - time);
+        return data.options;
     }
 
     async _set({ user, profile, data }) {
-        const time = new Data();
+        const time = new Date();
 
         try {
-            Option.update({ user, profile, options: { $set: data } }, { runValidators: true });
-            stats.timing('options_get', new Data() - time);
+            const document = await Option.findOne(
+                { user, profile },
+                { _id: true, options: true },
+                { lean: true }
+            );
+
+            if (document) {
+                await this._updateOptions(document, data);
+            } else {
+                await this._createOptions(user, profile, data);
+            }
+
+            stats.timing('options_get', new Date() - time);
         } catch (error) {
+            logger.error(error);
             stats.increment('options_invalid_request');
             throw errors.E400.error;
         }
+    }
+
+    async _updateOptions(document, data) {
+        const options = Object.assign({}, document.options, data);
+
+        await Option.update({ _id: document._id }, { $set: { options } }, { runValidators: true });
+    }
+
+    async _createOptions(user, profile, data) {
+        const model = new Option({ user, profile, options: { ...data } });
+
+        await model.save();
     }
 }
 
