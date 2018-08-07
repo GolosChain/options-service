@@ -10,8 +10,7 @@ module.exports = MongoDB.makeModel(
         },
         profile: {
             type: String,
-            enum: ['web', 'ios', 'android'],
-            default: 'web',
+            required: true,
         },
         options: {
             type: Object,
