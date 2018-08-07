@@ -29,7 +29,7 @@ class Distributor extends BasicService {
 
     async _get({ user, profile }) {
         const time = new Date();
-        let model = await this._findOrCreate(user, profile);
+        const model = await this._findOrCreate(user, profile);
 
         stats.timing('options_get', new Date() - time);
         return model.options;
@@ -39,7 +39,7 @@ class Distributor extends BasicService {
         const time = new Date();
 
         try {
-            let model = await this._findOrCreate(user, profile);
+            const model = await this._findOrCreate(user, profile);
 
             model.options = Object.assign({}, model.options, data);
 
