@@ -1,6 +1,8 @@
 const core = require('gls-core-service');
+const logger = core.Logger;
 const BasicService = core.service.Basic;
 const stats = core.Stats.client;
+const errors = core.HttpError;
 const Option = require('../model/Option');
 
 class Distributor extends BasicService {
@@ -25,98 +27,42 @@ class Distributor extends BasicService {
         await this.stopNested();
     }
 
-    async _get(data) {
-        let forcedUser = null;
+    async _get({ user, profile }) {
+        const time = new Date();
+        const model = await this._findOrCreate(user, profile);
 
-        if (data._frontendGate) {
-            forcedUser = data.user;
-            data = data.params;
-        }
-
-        const result = [];
-        const requestedOptions = this._normalizeData(data);
-
-        for (let { user, service, path } of requestedOptions) {
-            user = forcedUser || user;
-
-            const timer = new Date();
-            const record = await this._getUser(user);
-
-            if (!record) {
-                throw { code: 404, message: 'Not found' };
-            }
-
-            try {
-                result.push(this._extractOptions(record, service, path));
-            } catch (error) {
-                result.push(null);
-            } finally {
-                stats.timing('extract_one_option', new Date() - timer);
-            }
-        }
-
-        return result;
+        stats.timing('options_get', new Date() - time);
+        return model.options;
     }
 
-    async _getUser(user) {
-        return await Option.findOne({ user }, { _id: 0, options: 1 });
-    }
+    async _set({ user, profile, data }) {
+        const time = new Date();
 
-    _extractOptions(record, service, path) {
-        let options = record.options[service];
+        try {
+            const model = await this._findOrCreate(user, profile);
 
-        if (path) {
-            for (let token of path.split('.')) {
-                options = options[token];
-            }
-        }
+            model.options = Object.assign({}, model.options, data);
 
-        return options;
-    }
+            await model.save();
 
-    async _set(data) {
-        let forcedUser = null;
-
-        if (data._frontendGate) {
-            forcedUser = data.user;
-            data = data.params;
-        }
-
-        const timer = new Date();
-        const targetOptions = this._normalizeData(data);
-
-        for (let { user, service, path, data } of targetOptions) {
-            user = forcedUser || user;
-
-            let pathQuery = `options.${service}`;
-
-            if (path) {
-                pathQuery += `.${path}`;
-            }
-
-            try {
-                await Option.updateOne(
-                    { user },
-                    { $set: { user, [pathQuery]: data } },
-                    { upsert: true }
-                );
-            } catch (error) {
-                throw {
-                    code: 400,
-                    message: `Invalid params - ${user} | ${service} | ${path}`,
-                };
-            } finally {
-                stats.timing('update_one_option', new Date() - timer);
-            }
+            stats.timing('options_get', new Date() - time);
+        } catch (error) {
+            logger.error(error);
+            stats.increment('options_invalid_request');
+            throw errors.E400.error;
         }
     }
 
-    _normalizeData(data) {
-        if (data instanceof Array) {
-            return data;
+    async _findOrCreate(user, profile) {
+        let model = await Option.findOne({ user, profile });
+
+        if (!model) {
+            model = await new Option({ user, profile });
+
+            await model.save();
         }
 
-        return [data];
+        return model;
     }
 }
 
