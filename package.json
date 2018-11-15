@@ -1,6 +1,6 @@
 {
     "name": "options-service",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "",
     "main": "./src/Main.js",
     "scripts": {
@@ -15,10 +15,7 @@
     },
     "author": "golos.io",
     "license": "GPL-3.0",
-    "devDependencies": {
-        "prettier": "^1.13.6"
-    },
     "dependencies": {
-        "gls-core-service": "git+https://github.com/GolosChain/core-service.git"
+        "gls-core-service": "1.6"
     }
 }
