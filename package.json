@@ -1,21 +1,32 @@
 {
-    "name": "options-service",
-    "version": "0.3.1",
-    "description": "",
-    "main": "./src/Main.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "prettier": {
-        "singleQuote": true,
-        "tabWidth": 4,
-        "semi": true,
-        "trailingComma": "es5",
-        "printWidth": 100
-    },
-    "author": "golos.io",
-    "license": "GPL-3.0",
-    "dependencies": {
-        "gls-core-service": "1.6"
-    }
+  "name": "options-service",
+  "version": "0.3.1",
+  "description": "",
+  "main": "./src/Main.js",
+  "scripts": {
+    "start": "node src/Main.js"
+  },
+  "author": "golos.io",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "gls-core-service": "1.6"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "tabWidth": 4,
+    "semi": true,
+    "trailingComma": "es5",
+    "printWidth": 100,
+    "overrides": [
+      {
+        "files": [
+          "*.json",
+          "*.yml"
+        ],
+        "options": {
+          "tabWidth": 2
+        }
+      }
+    ]
+  }
 }
