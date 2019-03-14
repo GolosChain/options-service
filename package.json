@@ -4,7 +4,7 @@
   "description": "",
   "main": "./src/Main.js",
   "scripts": {
-    "start": "node src/Main.js"
+    "start": "node src/index.js"
   },
   "author": "golos.io",
   "license": "GPL-3.0",

@@ -1,20 +1,19 @@
 const core = require('gls-core-service');
 const logger = core.Logger;
-const BasicService = core.service.Basic;
-const stats = core.Stats.client;
-const errors = core.HttpError;
+const BasicService = core.services.Basic;
+const stats = core.utils.statsClient;
 const Option = require('../model/Option');
 const Favorite = require('../model/Favorite');
 
 class Distributor extends BasicService {
-    constructor(Gate) {
+    constructor(Connector) {
         super();
 
-        this._gate = new Gate();
+        this._connector = new Connector();
     }
 
     async start() {
-        await this._gate.start({
+        await this._connector.start({
             serverRoutes: {
                 get: this._get.bind(this),
                 set: this._set.bind(this),
@@ -24,7 +23,7 @@ class Distributor extends BasicService {
             },
         });
 
-        this.addNested(this._gate);
+        this.addNested(this._connector);
     }
 
     async stop() {
@@ -60,7 +59,10 @@ class Distributor extends BasicService {
         } catch (error) {
             logger.error(error);
             stats.increment('options_invalid_request');
-            throw errors.E400.error;
+            throw {
+                code: 400,
+                message: 'Bad request',
+            };
         }
     }
 
