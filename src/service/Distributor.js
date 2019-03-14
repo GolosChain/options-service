@@ -32,6 +32,12 @@ class Distributor extends BasicService {
     }
 
     async _get({ user, profile }) {
+        if (!user || !profile) {
+            throw {
+                code: 1101,
+                message: 'Both user and profile params are required',
+            };
+        }
         const time = new Date();
         const model = await this._findOrCreate(user, profile);
 
