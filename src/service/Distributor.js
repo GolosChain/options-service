@@ -38,6 +38,7 @@ class Distributor extends BasicService {
                 message: 'Both user and profile params are required',
             };
         }
+
         const time = new Date();
         const model = await this._findOrCreate(user, profile);
 
