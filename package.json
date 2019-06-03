@@ -4,12 +4,12 @@
   "description": "",
   "main": "./src/Main.js",
   "scripts": {
-    "start": "node src/Main.js"
+    "start": "node src/index.js"
   },
   "author": "golos.io",
   "license": "GPL-3.0",
   "dependencies": {
-    "gls-core-service": "1.6"
+    "gls-core-service": "^3.12.0"
   },
   "prettier": {
     "singleQuote": true,

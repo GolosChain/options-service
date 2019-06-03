@@ -1,39 +1,16 @@
 const core = require('gls-core-service');
-const BasicService = core.service.Basic;
-const logger = core.Logger;
-const stats = core.Stats.client;
-const MongoDB = core.service.MongoDB;
-const Gate = core.service.Gate;
-const env = require('./Env');
+const BasicMain = core.services.BasicMain;
+const stats = core.utils.statsClient;
+const MongoDB = core.services.MongoDB;
+const Connector = core.services.Connector;
 const Distributor = require('./service/Distributor');
+const env = require('./data/env');
 
-class Main extends BasicService {
+class Main extends BasicMain {
     constructor() {
-        super();
-
-        this.printEnvBasedConfig(env);
-        this.addNested(new MongoDB(), new Distributor(Gate));
-        this.stopOnExit();
-    }
-
-    async start() {
-        await this.startNested();
-        stats.increment('main_service_start');
-    }
-
-    async stop() {
-        await this.stopNested();
-        stats.increment('main_service_stop');
-        process.exit(0);
+        super(stats, env);
+        this.addNested(new MongoDB(), new Distributor(Connector));
     }
 }
 
-new Main().start().then(
-    () => {
-        logger.info('Main service started!');
-    },
-    error => {
-        logger.error(`Main service failed - ${error}`);
-        process.exit(1);
-    }
-);
+module.exports = Main;
