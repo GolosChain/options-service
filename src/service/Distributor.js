@@ -37,15 +37,12 @@ class Distributor extends BasicService {
             };
         }
 
-        const time = new Date();
         const model = await this._findOrCreate(user, profile);
 
         return model.options;
     }
 
     async _set({ user, profile, data }) {
-        const time = new Date();
-
         try {
             const model = await this._findOrCreate(user, profile);
 
@@ -63,14 +60,12 @@ class Distributor extends BasicService {
     }
 
     async _getFavorites({ user }) {
-        const time = new Date();
         const model = await this._findOrCreateFavorites(user);
 
         return { list: model.list };
     }
 
     async _addFavorite({ user, permlink }) {
-        const time = new Date();
         const model = await this._findOrCreateFavorites(user);
 
         model.list.push(permlink);
@@ -78,7 +73,6 @@ class Distributor extends BasicService {
     }
 
     async _removeFavorite({ user, permlink }) {
-        const time = new Date();
         const model = await this._findOrCreateFavorites(user);
 
         model.list.pull(permlink);
