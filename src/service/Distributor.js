@@ -1,7 +1,6 @@
 const core = require('gls-core-service');
-const logger = core.Logger;
+const { Logger } = core.utils;
 const BasicService = core.services.Basic;
-const stats = core.utils.statsClient;
 const Option = require('../model/Option');
 const Favorite = require('../model/Favorite');
 
@@ -41,7 +40,6 @@ class Distributor extends BasicService {
         const time = new Date();
         const model = await this._findOrCreate(user, profile);
 
-        stats.timing('options_get', new Date() - time);
         return model.options;
     }
 
@@ -54,11 +52,9 @@ class Distributor extends BasicService {
             model.options = Object.assign({}, model.options, data);
 
             await model.save();
-
-            stats.timing('options_get', new Date() - time);
         } catch (error) {
-            logger.error(error);
-            stats.increment('options_invalid_request');
+            Logger.error(error);
+
             throw {
                 code: 400,
                 message: 'Bad request',
@@ -70,8 +66,6 @@ class Distributor extends BasicService {
         const time = new Date();
         const model = await this._findOrCreateFavorites(user);
 
-        stats.timing('favorites_get', new Date() - time);
-
         return { list: model.list };
     }
 
@@ -81,8 +75,6 @@ class Distributor extends BasicService {
 
         model.list.push(permlink);
         model.save();
-
-        stats.timing('favorites_add', new Date() - time);
     }
 
     async _removeFavorite({ user, permlink }) {
@@ -91,8 +83,6 @@ class Distributor extends BasicService {
 
         model.list.pull(permlink);
         model.save();
-
-        stats.timing('favorites_remove', new Date() - time);
     }
 
     async _findOrCreate(user, profile) {
