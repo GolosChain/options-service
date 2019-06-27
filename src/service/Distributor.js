@@ -100,15 +100,15 @@ class Distributor extends BasicService {
         await this.stopNested();
     }
 
-    async _get({ user, profile }) {
-        const model = await this._findOrCreate(user, profile);
+    async _get({ user, app, profile }) {
+        const model = await this._findOrCreate(user, app, profile);
 
         return model.options;
     }
 
-    async _set({ user, profile, data }) {
+    async _set({ user, app, profile, data }) {
         try {
-            const model = await this._findOrCreate(user, profile);
+            const model = await this._findOrCreate(user, app, profile);
 
             model.options = Object.assign({}, model.options, data);
 
@@ -120,31 +120,31 @@ class Distributor extends BasicService {
         }
     }
 
-    async _getFavorites({ user }) {
-        const model = await this._findOrCreateFavorites(user);
+    async _getFavorites({ user, app }) {
+        const model = await this._findOrCreateFavorites(user, app);
 
         return { list: model.list };
     }
 
-    async _addFavorite({ user, permlink }) {
-        const model = await this._findOrCreateFavorites(user);
+    async _addFavorite({ user, app, permlink }) {
+        const model = await this._findOrCreateFavorites(user, app);
 
         model.list.push(permlink);
         model.save();
     }
 
-    async _removeFavorite({ user, permlink }) {
-        const model = await this._findOrCreateFavorites(user);
+    async _removeFavorite({ user, app, permlink }) {
+        const model = await this._findOrCreateFavorites(user, app);
 
         model.list.pull(permlink);
         model.save();
     }
 
-    async _findOrCreate(user, profile) {
-        let model = await Option.findOne({ user, profile });
+    async _findOrCreate(user, app, profile) {
+        let model = await Option.findOne({ user, app, profile });
 
         if (!model) {
-            model = await new Option({ user, profile });
+            model = await new Option({ user, app, profile });
 
             await model.save();
         }
@@ -152,11 +152,11 @@ class Distributor extends BasicService {
         return model;
     }
 
-    async _findOrCreateFavorites(user) {
-        let model = await Favorite.findOne({ user });
+    async _findOrCreateFavorites(user, app) {
+        let model = await Favorite.findOne({ user, app });
 
         if (!model) {
-            model = await new Favorite({ user });
+            model = await new Favorite({ user, app });
 
             await model.save();
         }
