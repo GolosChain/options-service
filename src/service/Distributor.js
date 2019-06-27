@@ -14,11 +14,82 @@ class Distributor extends BasicService {
     async start() {
         await this._connector.start({
             serverRoutes: {
-                get: this._get.bind(this),
-                set: this._set.bind(this),
-                getFavorites: this._getFavorites.bind(this),
-                addFavorite: this._addFavorite.bind(this),
-                removeFavorite: this._removeFavorite.bind(this),
+                get: {
+                    handler: this._get,
+                    scope: this,
+                    inherits: ['identification', 'profileSpecify'],
+                    validation: {},
+                },
+                set: {
+                    handler: this._set,
+                    scope: this,
+                    inherits: ['identification', 'profileSpecify'],
+                    validation: {
+                        properties: {
+                            required: ['data'],
+                            data: {
+                                type: 'object',
+                            },
+                        },
+                    },
+                },
+                getFavorites: {
+                    handler: this._getFavorites,
+                    scope: this,
+                    inherits: ['identification'],
+                    validation: {},
+                },
+                addFavorite: {
+                    handler: this._addFavorite,
+                    scope: this,
+                    inherits: ['identification', 'permlinkSpecify'],
+                    validation: {},
+                },
+                removeFavorite: {
+                    handler: this._removeFavorite,
+                    scope: this,
+                    inherits: ['identification', 'permlinkSpecify'],
+                    validation: {},
+                },
+            },
+            serverDefaults: {
+                parents: {
+                    identification: {
+                        validation: {
+                            required: ['user'],
+                            properties: {
+                                user: {
+                                    type: 'string',
+                                },
+                                app: {
+                                    type: 'string',
+                                    enum: ['cyber', 'gls'],
+                                    default: 'cyber',
+                                },
+                            },
+                        },
+                    },
+                    profileSpecify: {
+                        validation: {
+                            required: ['profile'],
+                            properties: {
+                                profile: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                    permlinkSpecify: {
+                        validation: {
+                            required: ['permlink'],
+                            properties: {
+                                permlink: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -30,13 +101,6 @@ class Distributor extends BasicService {
     }
 
     async _get({ user, profile }) {
-        if (!user || !profile) {
-            throw {
-                code: 1101,
-                message: 'Both user and profile params are required',
-            };
-        }
-
         const model = await this._findOrCreate(user, profile);
 
         return model.options;
@@ -52,10 +116,7 @@ class Distributor extends BasicService {
         } catch (error) {
             Logger.error(error);
 
-            throw {
-                code: 400,
-                message: 'Bad request',
-            };
+            throw { code: 400, message: 'Bad request' };
         }
     }
 

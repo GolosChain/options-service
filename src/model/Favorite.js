@@ -8,6 +8,11 @@ module.exports = MongoDB.makeModel(
             type: String,
             required: true,
         },
+        app: {
+            type: String,
+            enum: ['cyber', 'gls'],
+            default: 'cyber',
+        },
         list: {
             type: [String],
             default: [],
