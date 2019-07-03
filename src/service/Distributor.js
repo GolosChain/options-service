@@ -25,8 +25,8 @@ class Distributor extends BasicService {
                     scope: this,
                     inherits: ['identification', 'profileSpecify'],
                     validation: {
+                        required: ['data'],
                         properties: {
-                            required: ['data'],
                             data: {
                                 type: 'object',
                             },
