@@ -8,6 +8,11 @@ module.exports = MongoDB.makeModel(
             type: String,
             required: true,
         },
+        app: {
+            type: String,
+            enum: ['cyber', 'gls'],
+            default: 'cyber',
+        },
         list: {
             type: [String],
             default: [],
@@ -18,6 +23,7 @@ module.exports = MongoDB.makeModel(
             {
                 fields: {
                     user: 1,
+                    app: 1,
                 },
                 options: {
                     unique: true,
