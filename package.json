@@ -9,7 +9,7 @@
   "author": "golos.io",
   "license": "GPL-3.0",
   "dependencies": {
-    "gls-core-service": "^3.37.1"
+    "gls-core-service": "^3.50.0"
   },
   "prettier": {
     "singleQuote": true,
