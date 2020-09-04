@@ -1,7 +1,6 @@
 const core = require('gls-core-service');
-const logger = core.Logger;
+const { Logger } = core.utils;
 const BasicService = core.services.Basic;
-const stats = core.utils.statsClient;
 const Option = require('../model/Option');
 const Favorite = require('../model/Favorite');
 
@@ -15,11 +14,82 @@ class Distributor extends BasicService {
     async start() {
         await this._connector.start({
             serverRoutes: {
-                get: this._get.bind(this),
-                set: this._set.bind(this),
-                getFavorites: this._getFavorites.bind(this),
-                addFavorite: this._addFavorite.bind(this),
-                removeFavorite: this._removeFavorite.bind(this),
+                get: {
+                    handler: this._get,
+                    scope: this,
+                    inherits: ['identification', 'profileSpecify'],
+                    validation: {},
+                },
+                set: {
+                    handler: this._set,
+                    scope: this,
+                    inherits: ['identification', 'profileSpecify'],
+                    validation: {
+                        required: ['data'],
+                        properties: {
+                            data: {
+                                type: 'object',
+                            },
+                        },
+                    },
+                },
+                getFavorites: {
+                    handler: this._getFavorites,
+                    scope: this,
+                    inherits: ['identification'],
+                    validation: {},
+                },
+                addFavorite: {
+                    handler: this._addFavorite,
+                    scope: this,
+                    inherits: ['identification', 'permlinkSpecify'],
+                    validation: {},
+                },
+                removeFavorite: {
+                    handler: this._removeFavorite,
+                    scope: this,
+                    inherits: ['identification', 'permlinkSpecify'],
+                    validation: {},
+                },
+            },
+            serverDefaults: {
+                parents: {
+                    identification: {
+                        validation: {
+                            required: ['user'],
+                            properties: {
+                                user: {
+                                    type: 'string',
+                                },
+                                app: {
+                                    type: 'string',
+                                    enum: ['cyber', 'gls'],
+                                    default: 'cyber',
+                                },
+                            },
+                        },
+                    },
+                    profileSpecify: {
+                        validation: {
+                            required: ['profile'],
+                            properties: {
+                                profile: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                    permlinkSpecify: {
+                        validation: {
+                            required: ['permlink'],
+                            properties: {
+                                permlink: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -30,76 +100,51 @@ class Distributor extends BasicService {
         await this.stopNested();
     }
 
-    async _get({ user, profile }) {
-        if (!user || !profile) {
-            throw {
-                code: 1101,
-                message: 'Both user and profile params are required',
-            };
-        }
+    async _get({ user, app, profile }) {
+        const model = await this._findOrCreate(user, app, profile);
 
-        const time = new Date();
-        const model = await this._findOrCreate(user, profile);
-
-        stats.timing('options_get', new Date() - time);
         return model.options;
     }
 
-    async _set({ user, profile, data }) {
-        const time = new Date();
-
+    async _set({ user, app, profile, data }) {
         try {
-            const model = await this._findOrCreate(user, profile);
+            const model = await this._findOrCreate(user, app, profile);
 
             model.options = Object.assign({}, model.options, data);
 
             await model.save();
-
-            stats.timing('options_get', new Date() - time);
         } catch (error) {
-            logger.error(error);
-            stats.increment('options_invalid_request');
-            throw {
-                code: 400,
-                message: 'Bad request',
-            };
+            Logger.error(error);
+
+            throw { code: 400, message: 'Bad request' };
         }
     }
 
-    async _getFavorites({ user }) {
-        const time = new Date();
-        const model = await this._findOrCreateFavorites(user);
-
-        stats.timing('favorites_get', new Date() - time);
+    async _getFavorites({ user, app }) {
+        const model = await this._findOrCreateFavorites(user, app);
 
         return { list: model.list };
     }
 
-    async _addFavorite({ user, permlink }) {
-        const time = new Date();
-        const model = await this._findOrCreateFavorites(user);
+    async _addFavorite({ user, app, permlink }) {
+        const model = await this._findOrCreateFavorites(user, app);
 
         model.list.push(permlink);
         model.save();
-
-        stats.timing('favorites_add', new Date() - time);
     }
 
-    async _removeFavorite({ user, permlink }) {
-        const time = new Date();
-        const model = await this._findOrCreateFavorites(user);
+    async _removeFavorite({ user, app, permlink }) {
+        const model = await this._findOrCreateFavorites(user, app);
 
         model.list.pull(permlink);
         model.save();
-
-        stats.timing('favorites_remove', new Date() - time);
     }
 
-    async _findOrCreate(user, profile) {
-        let model = await Option.findOne({ user, profile });
+    async _findOrCreate(user, app, profile) {
+        let model = await Option.findOne({ user, app, profile });
 
         if (!model) {
-            model = await new Option({ user, profile });
+            model = await new Option({ user, app, profile });
 
             await model.save();
         }
@@ -107,11 +152,11 @@ class Distributor extends BasicService {
         return model;
     }
 
-    async _findOrCreateFavorites(user) {
-        let model = await Favorite.findOne({ user });
+    async _findOrCreateFavorites(user, app) {
+        let model = await Favorite.findOne({ user, app });
 
         if (!model) {
-            model = await new Favorite({ user });
+            model = await new Favorite({ user, app });
 
             await model.save();
         }

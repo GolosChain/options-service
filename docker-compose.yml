@@ -35,7 +35,8 @@ services:
     container_name: options-node
     restart: always
     depends_on:
-      - options-mongo
+      options-mongo:
+        condition: service_healthy
     build:
       context: .
       dockerfile: Dockerfile
